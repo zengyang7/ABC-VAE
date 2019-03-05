@@ -1,0 +1,4 @@
+# The setting of autoencoders
+num 2  # The number of basis vector of PCA and autoencoder
+training_size 800  # The ratio of training samples
+
