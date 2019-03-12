@@ -32,6 +32,7 @@ mat_file = scio.loadmat(sys.argv[2])
 # test code
 #mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data.mat'
 #mat_file = scio.loadmat(mat_file_path)
+#training_size = 800
 
 parameters = mat_file['parameter_space']
 temperature = mat_file['T_sensitive'].T
@@ -108,7 +109,7 @@ mu = temperature.mean(axis=0)
 U,s,V = np.linalg.svd(temperature-mu, full_matrices=False)
 Zpca = np.dot(temperature - mu, V.transpose())
 
-Rpca = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
+Rpca = np.dot(Zpca[:,:num], V[:num, :])+mu   # reconstruction
 err = np.sum((temperature-Rpca)**2)/Rpca.shape[0]/Rpca.shape[1]
 R_s_pca = R_squared(Rpca, temperature)
 print('PCA reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
@@ -188,6 +189,9 @@ theta_P = [P_W1, P_W2, P_W3, P_b1, P_b2, P_b3]
 # parameter to encoder
 
 def Para2Enc(x):
+    '''
+    From parameter to the reduced coefficients
+    '''
     keep_prob = 0.6
     x = tf.matmul(x, P_W1)+P_b1
     x = tf.layers.dropout(x, keep_prob)
@@ -200,7 +204,9 @@ def Para2Enc(x):
     x = tf.nn.tanh(tf.layers.batch_normalization(x))
     return x
 
+# placeholder for Temperature field
 T_input = tf.placeholder("float", [None, temperature.shape[1]])
+# placeholder for boundary condition
 para_input = tf.placeholder("float", [None, parameters.shape[1]])
 
 encoder_variable = Encoder(T_input)
@@ -211,6 +217,7 @@ loss_vae = tf.reduce_mean(tf.pow(T_input-T_Pred, 2))
 with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
     optimizer_vae = tf.train.AdamOptimizer(learning_rate1, beta).minimize(loss_vae, var_list=theta)
 
+# relationship between boundary parameters and reduced coefficient
 encoder_pred = Para2Enc(para_input)
 T_P_Pred = Decoder(encoder_pred)
 loss_para2enc = tf.reduce_sum(tf.pow(encoder_variable-encoder_pred, 2))
@@ -247,7 +254,6 @@ print(np.max(np.abs(delta_percent)))
 R_s_ae = R_squared(Pred_vae, temperature[training_size:-1])
 print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae, 5)))
 
-
 for i in range(1, epoch2+1):
     batch_x, batch_y = next_batch(batch_size, train_para, train_data)
     _, l1 = sess.run([optimizer_para2enc, loss_para2enc], 
@@ -256,7 +262,7 @@ for i in range(1, epoch2+1):
         print('Step %i: Minibatch Loss: %f' % (i, l1))
 
 # Prediction of NN
-Ze_vae_s, Re_vae_s = sess.run([encoder_pred, T_P_Pred], feed_dict={T_input:test_data, para_input:test_para})
+Ze_vae_s, Re_vae_s = sess.run([encoder_pred, T_P_Pred], feed_dict={para_input:test_para})
 
 # inverse of normalization
 Pred_vae_s = Re_vae_s*(np.max(temperature)-np.min(temperature))*1.2+np.min(temperature)-1
