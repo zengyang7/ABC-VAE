@@ -26,7 +26,7 @@ for line in list_para:
     # variable value
     var_value = float(line[1])
     exec("%s = %d" % (var_name, var_value))
-
+print('The size of training samples: ', str(training_size))
 ## load data
 mat_file = scio.loadmat(sys.argv[2])
 # test code
@@ -62,10 +62,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 4000
+epoch1 = 100000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 5000
+epoch2 = 100000
 
 ## AE
 # encoder
@@ -104,15 +104,16 @@ def R_squared(Prediction, Observed):
     return R_s
 
 ## PCA
-mu = temperature.mean(axis=0)
-U,s,V = np.linalg.svd(temperature-mu, full_matrices=False)
-Zpca = np.dot(temperature - mu, V.transpose())
+mu = train_data.mean(axis=0)
+U,s,V = np.linalg.svd(train_data-mu, full_matrices=False)
+Zpca = np.dot(test_data - mu, V.transpose())
 
 Rpca = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
-err = np.sum((temperature-Rpca)**2)/Rpca.shape[0]/Rpca.shape[1]
-R_s_pca = R_squared(Rpca, temperature)
+Pred_pca = Rpca*1.2*(np.max(temperature)-np.min(temperature))+np.min(temperature)-1
+err = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
+R_s_pca = R_squared(Pred_pca, temperature[training_size:-1])
 print('PCA reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
-
+print('R square of PCA with '+ str(num)+ ' PCs:'+str(round(R_s_pca, 5)))
 
 E_W1 = tf.Variable(xavier_init([temperature.shape[1], 512]))
 E_b1 = tf.Variable(tf.zeros(shape=[512]))
@@ -238,7 +239,7 @@ Pred_vae = Re_vae*(np.max(temperature)-np.min(temperature))*1.2+np.min(temperatu
 
 # average of error
 err_vae = np.sum((temperature[training_size:-1]-Pred_vae)**2)/Re_vae.shape[0]/Re_vae.shape[1]
-print('VAE reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
+print('VAE reconstruction error with ' + str(num)+ ' PCs:'+str(round(err_vae, 5)))
 delta = Pred_vae-temperature[training_size:-1]
 delta_percent = delta/temperature[training_size:-1]
 print(np.max(np.abs(delta_percent)))
@@ -263,11 +264,11 @@ Pred_vae_s = Re_vae_s*(np.max(temperature)-np.min(temperature))*1.2+np.min(tempe
 
 # average of error
 err_vae_s = np.sum((temperature[training_size:-1]-Pred_vae_s)**2)/Re_vae_s.shape[0]/Re_vae_s.shape[1]
-print('VAE reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
+print('VAE reconstruction error with ' + str(num)+ ' PCs:'+str(round(err_vae_s, 5)))
 delta = Pred_vae_s-temperature[training_size:-1]
 delta_percent = delta/temperature[training_size:-1]
 print(np.max(np.abs(delta_percent)))
 
 # R square
-R_s_ae = R_squared(Pred_vae_s, temperature[training_size:-1])
-print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae, 5)))
+R_s_ae_s = R_squared(Pred_vae_s, temperature[training_size:-1])
+print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
