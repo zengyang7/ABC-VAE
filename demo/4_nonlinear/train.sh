@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -l procs=2,gpus=2
+#PBS -l procs=1,gpus=1
 #PBS -l walltime=01:00:00
 #PBS -q p100_normal_q
 #PBS -A mfulearn
@@ -19,4 +19,4 @@ module load cuda/9.0.176
 module load cudnn/7.1
 
 
-autoencoder_pod_w.py setting sensitive_data_6_10000.mat
+autoencoder_pod_w.py setting sensitive_usefull.mat

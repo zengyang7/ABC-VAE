@@ -37,7 +37,7 @@ mat_file = scio.loadmat(sys.argv[2])
 parameters = mat_file['parameter_space']
 temperature = mat_file['T_sensitive'].T
 
-parameters = parameters/2000
+parameters = parameters/nor_par
 # normalization
 t_data = (temperature-np.min(temperature)+1)/(1.2*(np.max(temperature)-np.min(temperature)))
 
@@ -109,16 +109,10 @@ mu = train_data.mean(axis=0)
 U,s,V = np.linalg.svd(train_data-mu, full_matrices=False)
 Zpca = np.dot(test_data - mu, V.transpose())
 
-<<<<<<< HEAD
 Rpca = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
 Pred_pca = Rpca*1.2*(np.max(temperature)-np.min(temperature))+np.min(temperature)-1
 err = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
 R_s_pca = R_squared(Pred_pca, temperature[training_size:-1])
-=======
-Rpca = np.dot(Zpca[:,:num], V[:num, :])+mu   # reconstruction
-err = np.sum((temperature-Rpca)**2)/Rpca.shape[0]/Rpca.shape[1]
-R_s_pca = R_squared(Rpca, temperature)
->>>>>>> 3f754d5dd1ad6b5d302907bb4672fed5ac126efd
 print('PCA reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
 print('R square of PCA with '+ str(num)+ ' PCs:'+str(round(R_s_pca, 5)))
 
