@@ -5,15 +5,21 @@
 # standard library imports
 import os, time, sys
 import scipy.io as scio
+from scipy.stats import multivariate_normal as mvn
 
 # third party imports
 import numpy as np
 import tensorflow as tf
 
+
 tf.reset_default_graph()
 
+model_path = './AE_Mapping.ckpt'
+
 # read inputs from inputs file
-file_para = open(sys.argv[1], 'r')
+#file_para = open(sys.argv[1], 'r')
+file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting'
+file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
     line = line.strip('\n')
@@ -25,14 +31,18 @@ for line in list_para:
     var_name = line[0]
     # variable value
     var_value = float(line[1])
-    exec("%s = %d" % (var_name, var_value))
+    #exec("%s = %d" % (var_name, var_value))
+    exec("%s = %.3f" % (var_name, var_value))
+num = int(num)
+N = int(N)
+
 print('The size of training samples: ', str(training_size))
 ## load data
-mat_file = scio.loadmat(sys.argv[2])
+#mat_file = scio.loadmat(sys.argv[2])
 # test code
-#mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data.mat'
-#mat_file = scio.loadmat(mat_file_path)
-#training_size = 800
+mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_10000.mat'
+mat_file = scio.loadmat(mat_file_path)
+training_size = 8000
 
 parameters = mat_file['parameter_space']
 temperature = mat_file['T_sensitive'].T
@@ -63,10 +73,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 100000
+epoch1 = 10000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 100000
+epoch2 = 10000
 
 ## AE
 # encoder
@@ -227,6 +237,8 @@ with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
 
 init = tf.global_variables_initializer()
 
+saver = tf.train.Saver()
+
 sess = tf.Session()
 
 sess.run(init)
@@ -268,6 +280,9 @@ Ze_vae_s, Re_vae_s = sess.run([encoder_pred, T_P_Pred], feed_dict={para_input:te
 # inverse of normalization
 Pred_vae_s = Re_vae_s*(np.max(temperature)-np.min(temperature))*1.2+np.min(temperature)-1
 
+# save the variables
+save_path = saver.save(sess, model_path)
+
 # average of error
 err_vae_s = np.sum((temperature[training_size:-1]-Pred_vae_s)**2)/Re_vae_s.shape[0]/Re_vae_s.shape[1]
 print('VAE reconstruction error with ' + str(num)+ ' PCs:'+str(round(err_vae_s, 5)))
@@ -278,3 +293,94 @@ print(np.max(np.abs(delta_percent)))
 # R square
 R_s_ae_s = R_squared(Pred_vae_s, temperature[training_size:-1])
 print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
+
+
+###############################################################################
+# PMC
+###############################################################################
+observationname = '/Users/zengyang/VAE/demo/6_nonlinear/observation_data.mat'
+#Observations_file = scio.loadmat(sys.argv[3])
+Observations_file = scio.loadmat(observationname)
+Observations = Observations_file['T0'].T
+
+Ze_observation = sess.run(encoder_variable, feed_dict={T_input:Observations})
+
+# prior
+mu_prior = np.array([900, 2000, 1340, 1060, 2100, 1300])
+sigma_prior = np.diag((mu_prior*0.05)**2)
+
+Kesi_record  = []
+Sigma_record = []
+
+Appro_poster = []
+
+data_calculation = np.zeros([N, parameters.shape[1]+2])
+
+for i in range(N):
+    theta   = np.random.multivariate_normal(mu_prior, sigma_prior, 1)
+    Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta})
+    pho     = np.sum((Ze_pred - Ze_observation)**2)
+    w = 1
+    data_calculation[i, 0:6] = theta
+    data_calculation[i, 6]   = w/N
+    data_calculation[i, 7]   = pho
+    
+index = np.argsort(data_calculation[:,-1])
+data_calculation = data_calculation[index]
+
+kesi  = data_calculation[int(N*alpha), -1]
+sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
+
+Kesi_record.append(kesi)
+Sigma_record.append(sigma)
+Appro_poster.append(data_calculation)
+
+p_acc = 1
+
+while p_acc > p_acc_min:
+    
+    p_acc_cal = 0
+    
+    for i in range(int(N*alpha), N):
+        
+        ##sample from last particle based on the weight
+        # cum sum weights
+        weight_cum = data_calculation[:int(N*alpha),6].cumsum(0)
+        # normalization
+        weight_cum = weight_cum/weight_cum[-1]
+        # generata random value
+        rand     = np.random.random_sample()
+        particle = np.sum(rand > weight_cum)
+        theta_particle = data_calculation[particle, 0:6]
+        
+        # generate new sample with the particle
+        theta_new = np.random.multivariate_normal(theta_particle, np.diag(sigma), 1)
+        
+        # determine the weight of new sample
+        Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta_new})
+        pho     = np.sum((Ze_pred - Ze_observation)**2)   
+        sum_w   = 0
+        
+        for j in range(int(N*alpha)):
+            w_j       = data_calculation[j, 6]/np.sum(data_calculation[:int(N*alpha), 6])
+            # N(theta_new, theta^(t-1)_j, sigma)
+            pdf_theta = mvn.pdf(theta_new, mean=data_calculation[j, 0:6], cov=np.diag(sigma))
+            sum_w    += w_j*pdf_theta
+        w = mvn.pdf(theta_new, mean=mu_prior, cov=sigma_prior)/sum_w
+        
+        # new samples
+        data_calculation[i, 0:6] = theta_new
+        data_calculation[i, 6] = w
+        data_calculation[i, 7] = pho
+        if pho<kesi:
+            p_acc_cal += 1
+    p_acc = p_acc_cal/(N - N*alpha)
+    index = np.argsort(data_calculation[:,-1])
+    data_calculation = data_calculation[index]
+    
+    kesi = data_calculation[int(N*alpha), -1]
+    sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
+    
+    Kesi_record.append(kesi)
+    Sigma_record.append(sigma)
+    Appro_poster.append(data_calculation)
