@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #PBS -l procs=1,gpus=1
-#PBS -l walltime=00:30:00
+#PBS -l walltime=00:50:00
 #PBS -q p100_normal_q
 #PBS -A mfulearn
 #PBS -W group_list=newriver
@@ -19,4 +19,4 @@ module load cuda/9.0.176
 module load cudnn/7.1
 
 source ../../src/init
-autoencoder_pod_w.py setting sensitive_data_6_10000.mat
+autoencoder_pod_w.py setting sensitive_data_6_10000.mat observation_data.mat
