@@ -4,5 +4,5 @@ training_size 2000  # The ratio of training samples
 nor_par 2000        # normalization of parameters
 
 N 4000
-alpha 0.7
-p_acc_min 0.02
+alpha 0.5
+p_acc_min 0.1
