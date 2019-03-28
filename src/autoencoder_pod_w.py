@@ -312,8 +312,8 @@ sigma_prior = np.diag((mu_prior*0.05)**2)
 
 Kesi_record  = []
 Sigma_record = []
-
 Appro_poster = []
+P_acc_record = []
 
 data_calculation = np.zeros([N, parameters.shape[1]+2])
 
@@ -337,7 +337,7 @@ Sigma_record.append(sigma)
 Appro_poster.append(data_calculation)
 
 p_acc = 1
-t = 1
+
 while p_acc > p_acc_min:
     t += 1
     print(t)
@@ -384,6 +384,7 @@ while p_acc > p_acc_min:
     kesi = data_calculation[int(N*alpha), -1]
     sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
     
+    P_acc_record.append(p_acc)
     Kesi_record.append(kesi)
     Sigma_record.append(sigma)
     Appro_poster.append(data_calculation)
