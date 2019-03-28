@@ -73,10 +73,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 10000
+epoch1 = 20000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 10000
+epoch2 = 20000
 
 ## AE
 # encoder
@@ -312,8 +312,8 @@ sigma_prior = np.diag((mu_prior*0.05)**2)
 
 Kesi_record  = []
 Sigma_record = []
-
 Appro_poster = []
+P_acc_record = []
 
 data_calculation = np.zeros([N, parameters.shape[1]+2])
 
@@ -338,8 +338,10 @@ Appro_poster.append(data_calculation)
 
 p_acc = 1
 
+t = 0
 while p_acc > p_acc_min:
-    
+    print(t)
+    t += 1
     p_acc_cal = 0
     
     for i in range(int(N*alpha), N):
@@ -376,12 +378,14 @@ while p_acc > p_acc_min:
         if pho<kesi:
             p_acc_cal += 1
     p_acc = p_acc_cal/(N - N*alpha)
+    print(p_acc)
     index = np.argsort(data_calculation[:,-1])
     data_calculation = data_calculation[index]
     
     kesi = data_calculation[int(N*alpha), -1]
     sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
     
+    P_acc_record.append(p_acc)
     Kesi_record.append(kesi)
     Sigma_record.append(sigma)
     Appro_poster.append(data_calculation)
