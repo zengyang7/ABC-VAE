@@ -73,17 +73,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-<<<<<<< HEAD
-epoch1 = 20000
-
-# epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
-=======
 epoch1 = 50000
 
 # epoch for training NN from parameters to reduced coefficients
 epoch2 = 50000
->>>>>>> c70fc02cfb71e15d01cf5940e260d55eb5df6fd0
 
 ## AE
 # encoder
@@ -344,18 +337,10 @@ Sigma_record.append(sigma)
 Appro_poster.append(data_calculation)
 
 p_acc = 1
-<<<<<<< HEAD
 
-t = 0
-while p_acc > p_acc_min:
-    print(t)
-    t += 1
-=======
-t = 1
 while p_acc > p_acc_min:
     t += 1
     print(t)
->>>>>>> c70fc02cfb71e15d01cf5940e260d55eb5df6fd0
     p_acc_cal = 0
     
     for i in range(int(N*alpha), N):
