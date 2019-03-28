@@ -302,6 +302,7 @@ print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 Observations_file = scio.loadmat(sys.argv[3])
 #Observations_file = scio.loadmat(observationname)
 Observations = Observations_file['T0'].T
+Observations = (Observations-np.min(temperature)+1)/(1.2*(np.max(temperature)-np.min(temperature)))
 
 Ze_observation = sess.run(encoder_variable, feed_dict={T_input:Observations})
 
@@ -317,11 +318,11 @@ Appro_poster = []
 data_calculation = np.zeros([N, parameters.shape[1]+2])
 
 for i in range(N):
-    theta   = np.random.multivariate_normal(mu_prior, sigma_prior, 1)
+    theta   = np.random.multivariate_normal(mu_prior, sigma_prior, 1)/nor_par
     Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta})
     pho     = np.sum((Ze_pred - Ze_observation)**2)
     w = 1
-    data_calculation[i, 0:6] = theta
+    data_calculation[i, 0:6] = theta*nor_par
     data_calculation[i, 6]   = w/N
     data_calculation[i, 7]   = pho
     
@@ -355,7 +356,7 @@ while p_acc > p_acc_min:
         theta_particle = data_calculation[particle, 0:6]
         
         # generate new sample with the particle
-        theta_new = np.random.multivariate_normal(theta_particle, np.diag(sigma), 1)
+        theta_new = np.random.multivariate_normal(theta_particle, np.diag(sigma), 1)/nor_par
         
         # determine the weight of new sample
         Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta_new})
@@ -365,12 +366,12 @@ while p_acc > p_acc_min:
         for j in range(int(N*alpha)):
             w_j       = data_calculation[j, 6]/np.sum(data_calculation[:int(N*alpha), 6])
             # N(theta_new, theta^(t-1)_j, sigma)
-            pdf_theta = mvn.pdf(theta_new, mean=data_calculation[j, 0:6], cov=np.diag(sigma))
+            pdf_theta = mvn.pdf(theta_new*nor_par, mean=data_calculation[j, 0:6], cov=np.diag(sigma))
             sum_w    += w_j*pdf_theta
-        w = mvn.pdf(theta_new, mean=mu_prior, cov=sigma_prior)/sum_w
+        w = mvn.pdf(theta_new*nor_par, mean=mu_prior, cov=sigma_prior)/sum_w
         
         # new samples
-        data_calculation[i, 0:6] = theta_new
+        data_calculation[i, 0:6] = theta_new*nor_par
         data_calculation[i, 6] = w
         data_calculation[i, 7] = pho
         if pho<kesi:
