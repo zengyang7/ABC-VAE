@@ -381,6 +381,8 @@ while p_acc > p_acc_min:
     data_calculation = data_calculation[index]
     
     kesi = data_calculation[int(N*alpha), -1]
+    std = np.std*(data_calculation[0:int(N*alpha),0:6], 0)
+    print('Iter'+str(t)+'_std:', std)
     sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
     
     P_acc_record.append(p_acc)
