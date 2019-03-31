@@ -370,7 +370,7 @@ while p_acc > p_acc_min:
         w = mvn.pdf(theta_new, mean=mu_prior, cov=sigma_prior)/sum_w
         
         # new samples
-        data_calculation[i, 0:6] = theta_new*nor_par
+        data_calculation[i, 0:6] = theta_new
         data_calculation[i, 6] = w
         data_calculation[i, 7] = pho
         if pho<kesi:
@@ -381,7 +381,7 @@ while p_acc > p_acc_min:
     data_calculation = data_calculation[index]
     
     kesi = data_calculation[int(N*alpha), -1]
-    std = np.std*(data_calculation[0:int(N*alpha),0:6], 0)
+    std = np.std(data_calculation[0:int(N*alpha),0:6], 0)
     print('Iter'+str(t)+'_std:', std)
     sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
     
