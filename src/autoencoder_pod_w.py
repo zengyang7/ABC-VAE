@@ -40,7 +40,7 @@ mat_file = scio.loadmat(sys.argv[2])
 # test code
 #mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_10000.mat'
 #mat_file = scio.loadmat(mat_file_path)
-training_size = 8000
+training_size = int(training_size)
 
 parameters = mat_file['parameter_space']
 temperature = mat_file['T_sensitive'].T
