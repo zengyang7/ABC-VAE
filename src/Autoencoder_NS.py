@@ -407,12 +407,13 @@ while p_acc > p_acc_min:
     std = np.std(data_calculation[:,0:num_var], 0)
     print('Iter '+str(t)+'_std:', std)
     print('kesi:', kesi)
+    print('Accepted ratio: ', p_acc)
     P_acc_record.append(p_acc)
     Kesi_record.append(kesi)
     Appro_poster.append(data_calculation)
 
     save_name = 'ABC_NS_result'
-    np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record)
+    np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record, c=P_acc_record)
     
         
         
