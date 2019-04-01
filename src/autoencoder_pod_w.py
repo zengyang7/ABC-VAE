@@ -71,10 +71,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 20000
+epoch1 = 80000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
+epoch2 = 80000
 
 ## AE
 # encoder
@@ -335,7 +335,7 @@ t = 1
 
 while p_acc > p_acc_min:
     t += 1
-    if t >= 40:
+    if t >= 80:
         break
     print(t)
     p_acc_cal = 0
