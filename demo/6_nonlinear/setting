@@ -5,4 +5,8 @@ nor_par 2000        # normalization of parameters
 
 N 4000
 alpha 0.5
+<<<<<<< HEAD
 p_acc_min 0.01
+=======
+p_acc_min 0.05
+>>>>>>> d1411d1bf171679bfc929e02a6f139f5bbec29ad
