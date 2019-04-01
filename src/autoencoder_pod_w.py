@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# Copyright 2018 YangZeng
+#!/usr/bin/env python3
 """ Training the numeric data """
 
 # standard library imports
@@ -14,9 +13,8 @@ import tensorflow as tf
 
 tf.reset_default_graph()
 
-model_path = './AE_Mapping.ckpt'
-
 # read inputs from inputs file
+# print(sys.argv[1])
 file_para = open(sys.argv[1], 'r')
 #file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting'
 #file_para = open(file_name1, 'r')
@@ -73,10 +71,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 50000
+epoch1 = 20000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 50000
+epoch2 = 20000
 
 ## AE
 # encoder
@@ -153,7 +151,7 @@ def Encoder(x):
     #x = tf.layers.dropout(x, keep_prob)
     x = lrelu(tf.layers.batch_normalization(x))
     x = tf.matmul(x, E_W4)+E_b4
-    x = tf.nn.tanh(tf.layers.batch_normalization(x))               
+    #x = tf.nn.tanh(tf.layers.batch_normalization(x))               
     return x
     
 D_W1 = tf.Variable(xavier_init([num, 128]))  
@@ -206,13 +204,13 @@ def Para2Enc(x):
     keep_prob = 0.6
     x = tf.matmul(x, P_W1)+P_b1
     x = tf.layers.dropout(x, keep_prob)
-    x = lrelu(tf.layers.batch_normalization(x))
+    x = tf.nn.tanh(tf.layers.batch_normalization(x))
     x = tf.matmul(x, P_W2)+P_b2
     x = tf.layers.dropout(x, keep_prob)
     x = lrelu(tf.layers.batch_normalization(x))
     x = tf.layers.dropout(x, keep_prob)
     x = tf.matmul(x, P_W3)+P_b3
-    x = tf.nn.tanh(tf.layers.batch_normalization(x))
+    x = lrelu(tf.layers.batch_normalization(x))
     return x
 
 # placeholder for Temperature field
@@ -236,8 +234,6 @@ with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
     optimizer_para2enc = tf.train.AdamOptimizer(learning_rate2,beta).minimize(loss_para2enc, var_list=theta_P)
 
 init = tf.global_variables_initializer()
-
-saver = tf.train.Saver()
 
 sess = tf.Session()
 
@@ -280,8 +276,6 @@ Ze_vae_s, Re_vae_s = sess.run([encoder_pred, T_P_Pred], feed_dict={para_input:te
 # inverse of normalization
 Pred_vae_s = Re_vae_s*(np.max(temperature)-np.min(temperature))*1.2+np.min(temperature)-1
 
-# save the variables
-save_path = saver.save(sess, model_path)
 
 # average of error
 err_vae_s = np.sum((temperature[training_size:-1]-Pred_vae_s)**2)/Re_vae_s.shape[0]/Re_vae_s.shape[1]
@@ -337,9 +331,12 @@ Sigma_record.append(sigma)
 Appro_poster.append(data_calculation)
 
 p_acc = 1
+t = 1
 
 while p_acc > p_acc_min:
     t += 1
+    if t >= 40:
+        break
     print(t)
     p_acc_cal = 0
     
@@ -356,22 +353,24 @@ while p_acc > p_acc_min:
         theta_particle = data_calculation[particle, 0:6]
         
         # generate new sample with the particle
-        theta_new = np.random.multivariate_normal(theta_particle, np.diag(sigma), 1)/nor_par
+        theta_new = np.random.multivariate_normal(theta_particle, np.diag(sigma), 1)
+        
+        theta_nn_input = theta_new/nor_par
         
         # determine the weight of new sample
-        Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta_new})
+        Ze_pred = sess.run(encoder_pred, feed_dict={para_input:theta_nn_input})
         pho     = np.sum((Ze_pred - Ze_observation)**2)   
         sum_w   = 0
         
         for j in range(int(N*alpha)):
-            w_j       = data_calculation[j, 6]/np.sum(data_calculation[:int(N*alpha), 6])
+            w_j       = weight_cum[j]
             # N(theta_new, theta^(t-1)_j, sigma)
-            pdf_theta = mvn.pdf(theta_new*nor_par, mean=data_calculation[j, 0:6], cov=np.diag(sigma))
+            pdf_theta = mvn.pdf(theta_new, mean=data_calculation[j, 0:6], cov=np.diag(sigma))
             sum_w    += w_j*pdf_theta
-        w = mvn.pdf(theta_new*nor_par, mean=mu_prior, cov=sigma_prior)/sum_w
+        w = mvn.pdf(theta_new, mean=mu_prior, cov=sigma_prior)/sum_w
         
         # new samples
-        data_calculation[i, 0:6] = theta_new*nor_par
+        data_calculation[i, 0:6] = theta_new
         data_calculation[i, 6] = w
         data_calculation[i, 7] = pho
         if pho<kesi:
@@ -382,6 +381,8 @@ while p_acc > p_acc_min:
     data_calculation = data_calculation[index]
     
     kesi = data_calculation[int(N*alpha), -1]
+    std = np.std(data_calculation[0:int(N*alpha),0:6], 0)
+    print('Iter'+str(t)+'_std:', std)
     sigma = 2 * np.var(data_calculation[0:int(N*alpha),0:6], 0)
     
     P_acc_record.append(p_acc)
@@ -389,5 +390,5 @@ while p_acc > p_acc_min:
     Sigma_record.append(sigma)
     Appro_poster.append(data_calculation)
 
-save_name = 'ABC_results'
-np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record)
+    save_name = 'ABC_results'
+    np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record)

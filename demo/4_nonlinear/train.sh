@@ -19,4 +19,4 @@ module load cuda/9.0.176
 module load cudnn/7.1
 
 source ../../src/init
-autoencoder_pod_w.py setting sensitive_usefull.mat
+AE_POD.py setting sensitive_data.mat
