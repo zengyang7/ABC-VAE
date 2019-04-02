@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-'''
-Autoencoder based approximate Bayesian computation: Nested sampling
-'''
+#!/usr/bin/env python3
+""" Training the numeric data """
 
 # standard library imports
 import os, time, sys
@@ -30,7 +29,7 @@ Input:
 '''
 
 #file_para = open(sys.argv[1], 'r')
-file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting_NS'
+file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
 file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
@@ -44,25 +43,23 @@ for line in list_para:
     # variable value
     var_value = float(line[1])
     #exec("%s = %d" % (var_name, var_value))
-    exec("%s = %.3f" % (var_name, var_value))
+    exec("%s = %.4f" % (var_name, var_value))
 
 # dimension of feature vector
 num = int(num)
-
 N = int(N)
-
 ## load data
 #mat_file = scio.loadmat(sys.argv[2])
 
 # test code
-mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_3000_new.mat'
+mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
 mat_file = scio.loadmat(mat_file_path)
 
 #parameters = mat_file['parameter_space']
 #temperature = mat_file['T_sensitive'].T
 
-parameters = mat_file['parameter_space']
-temperature = mat_file['T_sensitive'].T
+parameters = mat_file['parameters']
+temperature = mat_file['T_sensitive_4'].T
 
 training_size = int(parameters.shape[0]*training_ratio)
 print('The size of training samples: ', str(training_size))
@@ -93,10 +90,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 30000
+epoch1 = 20000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 30000
+epoch2 = 20000
 
 ## AE
 # encoder
@@ -319,22 +316,20 @@ print(np.max(np.abs(delta_percent)))
 R_s_ae_s = R_squared(Temp_pred, temperature[training_size:-1])
 print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 
-########################### Nested sampling ###################################
-# load observations
 
-#observations_file = scio.loadmat(sys.argv[3])
-observationname = '/Users/zengyang/VAE/demo/6_nonlinear/observation_data_new.mat'
-observations_file = scio.loadmat(observationname)
-obser_org = observations_file['T0'].T + noise*np.random.randn(1, parameters.shape[1])
-obser     = (obser_org-min_temp+1)/(1.2*(max_temp-min_temp))
+############################ ABC PMC ##########################################
 
-# the feature vector of observations
+Observations_file = scio.loadmat(sys.argv[3])
+#Observations_file = scio.loadmat(observationname)
+Observations = Observations_file['T0'].T + noise*np.random.randn(1, parameters.shape[1])
+obser = (Observations-min_temp+1)/(1.2*(max_temp-min_temp))
+
 feat_obser = sess.run(feat_vect, feed_dict={Temp_input:obser})
 
-mu_prior = np.array([900, 2000, 1340, 1060, 2100, 1300])
+# prior
+mu_prior = np.array([50, 160, 30, 180])
+num_var  = mu_prior.shape[0]
 sigma_prior = np.diag((mu_prior*0.05)**2)
-
-num_var = mu_prior.shape[0]
 
 Kesi_record  = []
 Sigma_record = []
@@ -366,11 +361,8 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while p_acc > p_acc_min:
-    t += 1
-    if t >= 10:
-        break
-    
+while t < 20:
+    t += 1    
     p_acc_cal = 0
     # cum sum weights
     weight_cum = data_calculation[:int(N*alpha), num_var+1].cumsum(0)
@@ -418,12 +410,3 @@ while p_acc > p_acc_min:
 
     save_name = 'ABC_NS_result'+str(noise)
     np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record, c=P_acc_record)
-    
-        
-        
-        
-
-
-
-
-
