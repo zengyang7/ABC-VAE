@@ -61,8 +61,8 @@ mat_file = scio.loadmat(sys.argv[2])
 #parameters = mat_file['parameter_space']
 #temperature = mat_file['T_sensitive'].T
 
-parameters = mat_file['parameters']
-temperature = mat_file['T_sensitive_1'].T
+parameters = mat_file['parameter_space']
+temperature = mat_file['T_sensitive'].T
 
 training_size = int(parameters.shape[0]*training_ratio)
 print('The size of training samples: ', str(training_size))
@@ -93,10 +93,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 20000
+epoch1 = 80000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
+epoch2 = 80000
 
 ## AE
 # encoder

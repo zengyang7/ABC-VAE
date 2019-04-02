@@ -1,0 +1,9 @@
+# The setting of autoencoders
+num 6  # The number of basis vector of PCA and autoencoder
+training_ratio 0.8  # The ratio of training samples
+nor_par 2000        # normalization of parameters
+
+N 4000
+alpha 0.7
+beta  0.4
+p_acc_min 0.01
