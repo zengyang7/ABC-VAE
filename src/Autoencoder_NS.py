@@ -93,10 +93,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 80000
+epoch1 = 20000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 80000
+epoch2 = 20000
 
 ## AE
 # encoder
@@ -361,6 +361,8 @@ for i in range(int(N*alpha)):
     pho = data_calculation[i, num_var]
     w   = (1-(pho/kesi)**2)/kesi
     data_calculation[i, num_var+1] = w
+
+p_acc = 1
 
 while p_acc > p_acc_min:
     t += 1
