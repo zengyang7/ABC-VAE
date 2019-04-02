@@ -29,9 +29,9 @@ Input:
     
 '''
 
-file_para = open(sys.argv[1], 'r')
-#file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
-#file_para = open(file_name1, 'r')
+#file_para = open(sys.argv[1], 'r')
+file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting_NS'
+file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
     line = line.strip('\n')
@@ -52,11 +52,11 @@ num = int(num)
 N = int(N)
 
 ## load data
-mat_file = scio.loadmat(sys.argv[2])
+#mat_file = scio.loadmat(sys.argv[2])
 
 # test code
-#mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
-#mat_file = scio.loadmat(mat_file_path)
+mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_3000_new.mat'
+mat_file = scio.loadmat(mat_file_path)
 
 #parameters = mat_file['parameter_space']
 #temperature = mat_file['T_sensitive'].T
@@ -93,10 +93,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 20000
+epoch1 = 30000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
+epoch2 = 30000
 
 ## AE
 # encoder
@@ -322,8 +322,9 @@ print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 ########################### Nested sampling ###################################
 # load observations
 
-observations_file = scio.loadmat(sys.argv[3])
-#Observations_file = scio.loadmat(observationname)
+#observations_file = scio.loadmat(sys.argv[3])
+observationname = '/Users/zengyang/VAE/demo/6_nonlinear/observation_data_new.mat'
+observations_file = scio.loadmat(observationname)
 obser_org = observations_file['T0'].T
 obser     = (obser_org-min_temp+1)/(1.2*(max_temp-min_temp))
 
@@ -355,14 +356,15 @@ for i in range(N):
 index = np.argsort(data_calculation[:, num_var])
 data_calculation = data_calculation[index]
 
-kesi  = data_calculation[int(N*alpha), -1]
+kesi  = data_calculation[int(N*alpha), num_var]
 
 for i in range(int(N*alpha)):
     pho = data_calculation[i, num_var]
-    w   = (1-(pho/kesi)**2)/kesi
+    w   = 1-(pho/kesi)**2
     data_calculation[i, num_var+1] = w
 
 p_acc = 1
+t = 0
 
 while p_acc > p_acc_min:
     t += 1
@@ -375,27 +377,27 @@ while p_acc > p_acc_min:
     # normalization
     weight_cum = weight_cum/weight_cum[-1]
     
-    for i in range(int(N*beta)):
+    for i in range(int(N*beta_N)):
         rand       = np.random.random_sample()
         particle   = np.sum(rand > weight_cum)
         data_resampling[i,:] = data_calculation[particle, 0:num_var+1]
     
-    mu    = np.mean(data_resampling[:int(N*beta), 0:num_var], 0)
-    sigma = 1.1*np.var(data_resampling[:int(N*beta), 0:num_var], 0)
+    mu    = np.mean(data_resampling[:int(N*beta_N), 0:num_var], 0)
+    sigma = 1.1*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
     
     p_acc_cal = 0
-    for i in range(int(N*beta), N):
+    for i in range(int(N*beta_N), N):
         pho = 100
         while pho > kesi:
             p_acc_cal += 1
-            theta       = np.random.multivariate_normal(mu, sigma, 1)
+            theta       = np.random.multivariate_normal(mu, np.diag(sigma), 1)
             theta_input = (theta-min_para+2)/(max_para-min_para)
             feat_theta  = sess.run(feat_pred, feed_dict={para_input:theta_input})
             pho         = np.sum((feat_theta - feat_obser)**2)
 
         data_resampling[i, 0:num_var] = theta
         data_resampling[i, num_var]   = pho
-    data_calculation[:, 0:num_var+1] = data_resampling
+    data_calculation[:, 0:num_var+1]  = data_resampling
     # sort the samples increasingly with pho  
     index = np.argsort(data_calculation[:, num_var])
     data_calculation = data_calculation[index]
@@ -403,9 +405,9 @@ while p_acc > p_acc_min:
     
     for i in range(int(N*alpha)):
         pho = data_calculation[i, num_var]
-        w   = (1-(pho/kesi)**2)/kesi
+        w   = 1-(pho/kesi)**2
         data_calculation[i, num_var+1] = w
-    p_acc = (N - N*beta)/ p_acc_cal
+    p_acc = (N - N*beta_N)/ p_acc_cal
     std = np.std(data_calculation[:,0:num_var], 0)
     print('Iter '+str(t)+'_std:', std)
     print('kesi:', kesi)
