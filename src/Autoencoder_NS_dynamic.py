@@ -55,9 +55,6 @@ N = int(N)
 mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
 mat_file = scio.loadmat(mat_file_path)
 
-#parameters = mat_file['parameter_space']
-#temperature = mat_file['T_sensitive'].T
-
 parameters = mat_file['parameters']
 temperature = mat_file['T_sensitive_4'].T
 
@@ -133,12 +130,12 @@ def R_squared(Prediction, Observed):
 
 ############################### PCA ##########################################
 mu_pca = train_temp.mean(axis=0)
-U,s,V  = np.linalg.svd(train_temp-mu, full_matrices=False)
+U,s,V  = np.linalg.svd(train_temp-mu_pca, full_matrices=False)
 
 # the reduced vector of POD
 Zpca  = np.dot(test_temp - mu_pca, V.transpose())
 
-Rpca  = np.dot(Zpca[:,:num],V[:num, :])+mu_pca   # reconstruction
+Rpca  = np.dot(Zpca[:,:num],V[:num, :]) + mu_pca   # reconstruction
 Pred_pca = Rpca*1.2*(max_temp-min_temp)+min_temp-1
 err   = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
 R_square_pca = R_squared(Pred_pca, temperature[training_size:-1])
