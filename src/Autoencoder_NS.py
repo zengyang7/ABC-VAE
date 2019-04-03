@@ -29,9 +29,9 @@ Input:
     
 '''
 
-#file_para = open(sys.argv[1], 'r')
-file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting_NS'
-file_para = open(file_name1, 'r')
+file_para = open(sys.argv[1], 'r')
+#file_name1 = '/Users/zengyang/VAE/demo/6_nonlinear/setting_NS'
+#file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
     line = line.strip('\n')
@@ -52,14 +52,11 @@ num = int(num)
 N = int(N)
 
 ## load data
-#mat_file = scio.loadmat(sys.argv[2])
+mat_file = scio.loadmat(sys.argv[2])
 
 # test code
-mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_3000_new.mat'
-mat_file = scio.loadmat(mat_file_path)
-
-#parameters = mat_file['parameter_space']
-#temperature = mat_file['T_sensitive'].T
+#mat_file_path = '/Users/zengyang/VAE/demo/6_nonlinear/sensitive_data_6_3000_new.mat'
+#mat_file = scio.loadmat(mat_file_path)
 
 parameters = mat_file['parameter_space']
 temperature = mat_file['T_sensitive'].T
@@ -93,10 +90,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 30000
+epoch1 = 100000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 30000
+epoch2 = 100000
 
 ## AE
 # encoder
@@ -141,9 +138,9 @@ U,s,V = np.linalg.svd(train_temp-mu, full_matrices=False)
 # the reduced vector of POD
 Zpca  = np.dot(test_temp - mu, V.transpose())
 
-Rpca = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
+Rpca  = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
 Pred_pca = Rpca*1.2*(max_temp-min_temp)+min_temp-1
-err = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
+err  = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
 R_square_pca = R_squared(Pred_pca, temperature[training_size:-1])
 print('PCA reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
 print('R square of PCA with '+ str(num)+ ' PCs:'+str(round(R_square_pca, 5)))
@@ -322,10 +319,10 @@ print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 ########################### Nested sampling ###################################
 # load observations
 
-#observations_file = scio.loadmat(sys.argv[3])
-observationname = '/Users/zengyang/VAE/demo/6_nonlinear/observation_data_new.mat'
-observations_file = scio.loadmat(observationname)
-obser_org = observations_file['T0'].T + noise*np.random.randn(1, parameters.shape[1])
+observations_file = scio.loadmat(sys.argv[3])
+#observationname = '/Users/zengyang/VAE/demo/6_nonlinear/observation_data_new.mat'
+#observations_file = scio.loadmat(observationname)
+obser_org = observations_file['T0'].T + noise*np.random.randn(1, temp.shape[1])
 obser     = (obser_org-min_temp+1)/(1.2*(max_temp-min_temp))
 
 # the feature vector of observations
@@ -366,11 +363,8 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while p_acc > p_acc_min:
+while t < 20:
     t += 1
-    if t >= 10:
-        break
-    
     p_acc_cal = 0
     # cum sum weights
     weight_cum = data_calculation[:int(N*alpha), num_var+1].cumsum(0)
