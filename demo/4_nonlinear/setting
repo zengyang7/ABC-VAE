@@ -1,5 +1,5 @@
 # The setting of autoencoders
-num 0               # The number of basis vector of PCA and autoencoder
+num 2               # The number of basis vector of PCA and autoencoder
 training_ratio 0.8  # The ratio of training samples
 
 N 4000              # The size of samples of NS

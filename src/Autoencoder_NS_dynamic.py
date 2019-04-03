@@ -55,9 +55,6 @@ mat_file = scio.loadmat(sys.argv[2])
 #mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
 #mat_file = scio.loadmat(mat_file_path)
 
-#parameters = mat_file['parameter_space']
-#temperature = mat_file['T_sensitive'].T
-
 parameters = mat_file['parameters']
 temperature = mat_file['T_sensitive_4'].T
 
@@ -132,15 +129,15 @@ def R_squared(Prediction, Observed):
     return R_s
 
 ############################### PCA ##########################################
-mu    = train_temp.mean(axis=0)
-U,s,V = np.linalg.svd(train_temp-mu, full_matrices=False)
+mu_pca = train_temp.mean(axis=0)
+U,s,V  = np.linalg.svd(train_temp-mu_pca, full_matrices=False)
 
 # the reduced vector of POD
-Zpca  = np.dot(test_temp - mu, V.transpose())
+Zpca  = np.dot(test_temp - mu_pca, V.transpose())
 
-Rpca = np.dot(Zpca[:,:num],V[:num, :])+mu   # reconstruction
+Rpca  = np.dot(Zpca[:,:num],V[:num, :]) + mu_pca   # reconstruction
 Pred_pca = Rpca*1.2*(max_temp-min_temp)+min_temp-1
-err = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
+err   = np.sum((Pred_pca-temperature[training_size:-1])**2)/Rpca.shape[0]/Rpca.shape[1]
 R_square_pca = R_squared(Pred_pca, temperature[training_size:-1])
 print('PCA reconstruction error with ' + str(num)+ ' PCs:'+str(round(err, 5)))
 print('R square of PCA with '+ str(num)+ ' PCs:'+str(round(R_square_pca, 5)))
@@ -319,9 +316,10 @@ print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 
 ############################ ABC NS ##########################################
 
-Observations_file = scio.loadmat(sys.argv[3])
-#Observations_file = scio.loadmat(observationname)
-Observations = Observations_file['T0'].T + noise*np.random.randn(1, parameters.shape[1])
+#Observations_file = scio.loadmat(sys.argv[3])
+observationname = '/Users/zengyang/VAE/demo/4_nonlinear/observation_dynamic.mat'
+Observations_file = scio.loadmat(observationname)
+Observations = Observations_file['T0'].T + noise*np.random.randn(1, temp.shape[1])
 obser = (Observations-min_temp+1)/(1.2*(max_temp-min_temp))
 
 feat_obser = sess.run(feat_vect, feed_dict={Temp_input:obser})
