@@ -377,7 +377,7 @@ while t < 20:
         data_resampling[i,:] = data_calculation[particle, 0:num_var+1]
     
     mu    = np.mean(data_resampling[:int(N*beta_N), 0:num_var], 0)
-    sigma = 1.2*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
+    sigma = 1.44*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
     
     p_acc_cal = 0
     for i in range(int(N*beta_N), N):

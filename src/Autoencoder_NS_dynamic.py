@@ -28,9 +28,9 @@ Input:
     
 '''
 
-#file_para = open(sys.argv[1], 'r')
-file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
-file_para = open(file_name1, 'r')
+file_para = open(sys.argv[1], 'r')
+#file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
+#file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
     line = line.strip('\n')
@@ -49,11 +49,11 @@ for line in list_para:
 num = int(num)
 N = int(N)
 ## load data
-#mat_file = scio.loadmat(sys.argv[2])
+mat_file = scio.loadmat(sys.argv[2])
 
 # test code
-mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
-mat_file = scio.loadmat(mat_file_path)
+#mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
+#mat_file = scio.loadmat(mat_file_path)
 
 #parameters = mat_file['parameter_space']
 #temperature = mat_file['T_sensitive'].T
@@ -90,10 +90,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 20000
+epoch1 = 50000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
+epoch2 = 50000
 
 ## AE
 # encoder
@@ -317,7 +317,7 @@ R_s_ae_s = R_squared(Temp_pred, temperature[training_size:-1])
 print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 
 
-############################ ABC PMC ##########################################
+############################ ABC NS ##########################################
 
 Observations_file = scio.loadmat(sys.argv[3])
 #Observations_file = scio.loadmat(observationname)

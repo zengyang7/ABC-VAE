@@ -7,4 +7,4 @@ N 4000              # The size of samples of NS
 alpha 0.5           # alpha
 beta_N  0.2         # Beta
 p_acc_min 0.01      # accept ratio
-noise 0.01          # noise
+noise 0          # noise
