@@ -7,9 +7,9 @@
 #PBS -W group_list=newriver
 #PBS -M yangzeng@vt.edu
 #PBS -m bea
-#PBS -N ABC_AE
+#PBS -N ABC_AE_NS
 #PBS -j oe
-#PBS -o AE.log
+#PBS -o ABC_AE_NS.log
 
 cd $PBS_O_WORKDIR
 
@@ -19,4 +19,4 @@ module load cuda/9.0.176
 module load cudnn/7.1
 
 source ../../src/init
-AE_POD.py setting sensitive_data.mat
+Autoencoder_NS_dynamic.py setting sensitive_data.mat observation_dynamic.mat

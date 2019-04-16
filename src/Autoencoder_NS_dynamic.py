@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python3
 """ Training the numeric data """
 
 # standard library imports
@@ -28,9 +27,9 @@ Input:
     
 '''
 
-#file_para = open(sys.argv[1], 'r')
-file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
-file_para = open(file_name1, 'r')
+file_para = open(sys.argv[1], 'r')
+#file_name1 = '/Users/zengyang/VAE/demo/4_nonlinear/setting'
+#file_para = open(file_name1, 'r')
 list_para = file_para.readlines()
 for line in list_para:
     line = line.strip('\n')
@@ -49,11 +48,11 @@ for line in list_para:
 num = int(num)
 N = int(N)
 ## load data
-#mat_file = scio.loadmat(sys.argv[2])
+mat_file = scio.loadmat(sys.argv[2])
 
 # test code
-mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
-mat_file = scio.loadmat(mat_file_path)
+#mat_file_path = '/Users/zengyang/VAE/demo/4_nonlinear/sensitive_data.mat'
+#mat_file = scio.loadmat(mat_file_path)
 
 parameters = mat_file['parameters']
 temperature = mat_file['T_sensitive_4'].T
@@ -87,10 +86,10 @@ beta = 0.9
 batch_size = 64
 
 # epoch for traing autoencoder
-epoch1 = 20000
+epoch1 = 50000
 
 # epoch for training NN from parameters to reduced coefficients
-epoch2 = 20000
+epoch2 = 50000
 
 ## AE
 # encoder
@@ -314,11 +313,11 @@ R_s_ae_s = R_squared(Temp_pred, temperature[training_size:-1])
 print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 
 
-############################ ABC PMC ##########################################
+############################ ABC NS ##########################################
 
-#Observations_file = scio.loadmat(sys.argv[3])
-observationname = '/Users/zengyang/VAE/demo/4_nonlinear/observation_dynamic.mat'
-Observations_file = scio.loadmat(observationname)
+Observations_file = scio.loadmat(sys.argv[3])
+#observationname = '/Users/zengyang/VAE/demo/4_nonlinear/observation_dynamic.mat'
+#Observations_file = scio.loadmat(observationname)
 Observations = Observations_file['T0'].T + noise*np.random.randn(1, temp.shape[1])
 obser = (Observations-min_temp+1)/(1.2*(max_temp-min_temp))
 
@@ -373,7 +372,7 @@ while t < 20:
         data_resampling[i,:] = data_calculation[particle, 0:num_var+1]
     
     mu    = np.mean(data_resampling[:int(N*beta_N), 0:num_var], 0)
-    sigma = 1.2*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
+    sigma = 1.44*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
     
     p_acc_cal = 0
     for i in range(int(N*beta_N), N):
