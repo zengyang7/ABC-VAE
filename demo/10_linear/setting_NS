@@ -1,0 +1,10 @@
+# The setting of autoencoders
+num 6               # The number of basis vector of PCA and autoencoder
+training_ratio 0.8  # The ratio of training samples
+nor_par 2000        # normalization of parameters
+
+N 4000              # The size of samples of NS
+alpha 0.7           # alpha
+beta_N  0.4         # Beta
+p_acc_min 0.01      # accept ratio
+noise 0          # noise
