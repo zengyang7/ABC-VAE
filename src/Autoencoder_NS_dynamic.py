@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python3
 """ Training the numeric data """
 
 # standard library imports
@@ -316,9 +315,9 @@ print('R square of ae with ' + str(num)+ ' PCs:'+str(round(R_s_ae_s, 5)))
 
 ############################ ABC NS ##########################################
 
-#Observations_file = scio.loadmat(sys.argv[3])
-observationname = '/Users/zengyang/VAE/demo/4_nonlinear/observation_dynamic.mat'
-Observations_file = scio.loadmat(observationname)
+Observations_file = scio.loadmat(sys.argv[3])
+#observationname = '/Users/zengyang/VAE/demo/4_nonlinear/observation_dynamic.mat'
+#Observations_file = scio.loadmat(observationname)
 Observations = Observations_file['T0'].T + noise*np.random.randn(1, temp.shape[1])
 obser = (Observations-min_temp+1)/(1.2*(max_temp-min_temp))
 
@@ -373,7 +372,7 @@ while t < 20:
         data_resampling[i,:] = data_calculation[particle, 0:num_var+1]
     
     mu    = np.mean(data_resampling[:int(N*beta_N), 0:num_var], 0)
-    sigma = 1.2*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
+    sigma = 1.44*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
     
     p_acc_cal = 0
     for i in range(int(N*beta_N), N):
