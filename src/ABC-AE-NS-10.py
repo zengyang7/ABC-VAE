@@ -363,7 +363,7 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while t < 20:
+while t < 50:
     t += 1
     p_acc_cal = 0
     # cum sum weights
@@ -410,7 +410,7 @@ while t < 20:
     Kesi_record.append(kesi)
     Appro_poster.append(data_calculation)
 
-    save_name = 'ABC_NS_result-10'+str(noise)
+    save_name = 'ABC-NS-result-10-Noise'+str(noise)
     np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record, c=P_acc_record)
     
         

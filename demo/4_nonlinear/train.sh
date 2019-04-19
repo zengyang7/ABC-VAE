@@ -9,7 +9,7 @@
 #PBS -m bea
 #PBS -N ABC_AE_NS
 #PBS -j oe
-#PBS -o ABC_AE_NS.log
+#PBS -o ABC_AE_NS-Noise0000.log
 
 cd $PBS_O_WORKDIR
 
@@ -19,4 +19,4 @@ module load cuda/9.0.176
 module load cudnn/7.1
 
 source ../../src/init
-Autoencoder_NS_dynamic.py setting sensitive_data.mat observation_dynamic.mat
+ABC-AE-NS-Nonlinear-4.py setting sensitive_data.mat observation_dynamic.mat

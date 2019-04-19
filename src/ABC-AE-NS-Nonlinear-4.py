@@ -358,7 +358,7 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while t < 20:
+while t < 5:
     t += 1    
     p_acc_cal = 0
     # cum sum weights
@@ -371,8 +371,8 @@ while t < 20:
         particle   = np.sum(rand > weight_cum)
         data_resampling[i,:] = data_calculation[particle, 0:num_var+1]
     
-    mu    = np.mean(data_resampling[:int(N*beta_N), 0:num_var], 0)
-    sigma = 1.44*np.var(data_resampling[:int(N*beta_N), 0:num_var], 0)
+    mu    = np.mean(data_calculation[:int(N*alpha), 0:num_var], 0)
+    sigma = 1.1*np.var(data_calculation[:int(N*alpha), 0:num_var], 0)
     
     p_acc_cal = 0
     for i in range(int(N*beta_N), N):
