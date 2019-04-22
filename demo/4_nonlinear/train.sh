@@ -9,7 +9,7 @@
 #PBS -m bea
 #PBS -N ABC_AE_NS
 #PBS -j oe
-#PBS -o ABC_AE_NS-Noise0000.log
+#PBS -o ABC_AE_NS-Noise1.log
 
 cd $PBS_O_WORKDIR
 
