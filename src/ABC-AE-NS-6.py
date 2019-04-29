@@ -44,7 +44,7 @@ for line in list_para:
     # variable value
     var_value = float(line[1])
     #exec("%s = %d" % (var_name, var_value))
-    exec("%s = %.3f" % (var_name, var_value))
+    exec("%s = %.5f" % (var_name, var_value))
 
 # dimension of feature vector
 num = int(num)

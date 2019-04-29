@@ -44,7 +44,7 @@ for line in list_para:
     # variable value
     var_value = float(line[1])
     #exec("%s = %d" % (var_name, var_value))
-    exec("%s = %.3f" % (var_name, var_value))
+    exec("%s = %.5f" % (var_name, var_value))
 
 # dimension of feature vector
 num = int(num)
@@ -363,7 +363,7 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while t < 50:
+while t < 30:
     t += 1
     p_acc_cal = 0
     # cum sum weights
@@ -404,13 +404,16 @@ while t < 50:
     p_acc = (N - N*beta_N)/ p_acc_cal
     std = np.std(data_calculation[:,0:num_var], 0)
     print('Iter '+str(t)+'_std:', std)
+    mean_ = np.mean(data_calculation[:, 0:num_var], 0)
+    print('Iter '+str(t)+'_mean:', mean_)
     print('kesi:', kesi)
     print('Accepted ratio: ', p_acc)
     P_acc_record.append(p_acc)
     Kesi_record.append(kesi)
     Appro_poster.append(data_calculation)
 
-    save_name = 'ABC-NS-result-10-Noise'+str(noise)
+    save_name = 'ABC-NS-result-10-Noise'#+str(noise)
+    print(save_name)
     np.savez_compressed(save_name, a=Appro_poster, b=Kesi_record, c=P_acc_record)
     
         

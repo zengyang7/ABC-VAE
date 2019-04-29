@@ -358,7 +358,7 @@ for i in range(int(N*alpha)):
 p_acc = 1
 t = 0
 
-while t <20:
+while t < 20:
     t += 1    
     p_acc_cal = 0
     # cum sum weights
